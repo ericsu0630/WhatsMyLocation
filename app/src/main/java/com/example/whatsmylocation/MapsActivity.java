@@ -3,6 +3,8 @@ package com.example.whatsmylocation;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -14,6 +16,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import java.util.List;
+import java.util.Locale;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -60,8 +64,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.i("Location", location.toString());
                 mMap.clear();
                 LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                mMap.addMarker(new MarkerOptions().position(userLocation).title("Your location"));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 10));
+                String address = "";
+                Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+                try {
+                    List<Address> listOfAddresses = geocoder.getFromLocation(location.getLatitude(),location.getLongitude(),1);
+                    if(listOfAddresses != null && listOfAddresses.size() > 0){
+
+                        Log.i("Address",listOfAddresses.get(0).toString());
+                        if(listOfAddresses.get(0).getAddressLine(0) != null){
+                            address += listOfAddresses.get(0).getAddressLine(0);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    address = "Unknown address";
+                }
+                mMap.addMarker(new MarkerOptions().position(userLocation).title(address));
             }
 
             @Override
